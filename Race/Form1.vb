@@ -9,6 +9,7 @@ Public Class Form1
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         InArr = {{R1B1, R1B2, R1B3}, {R2B1, R2B2, R2B3}, {R3B1, R3B2, R3B3}, {R4B1, R4B2, R4B3}}
         OutArr = {{TotalB1, TotalB2, TotalB3}, {RankB1, RankB2, RankB3}}
+        Error_Label.Text = ""
     End Sub
 
     Function Register_Tie()
@@ -106,19 +107,21 @@ Public Class Form1
 
             Dim uselessvar = 0
             'I don't feel like taking the time to
-            'figure out the time complexity of this sort so imma just let it run 5 times. Should be enough???
-            For uselessiterator = 0 To 5
+            'figure out the time complexity of this sort so imma guess that 3 reps should be enough??? N?
+            For uselessiterator = 0 To 2
                 For Boat = 0 To MaxIndexBoats - 1
-                    'This line is boolean salad, but it's basically taking 2 indices and checking to see if the
-                    'relative ranking of those two respecive values are obviously wrong (not checking ties) 
-                    If (OutIntArr(Boat) > OutIntArr(Boat + 1) And Ranking(Boat) > OutIntArr(Boat + 1)) Or (OutIntArr(Boat) < OutIntArr(Boat + 1) And Ranking(Boat) < OutIntArr(Boat + 1)) Then
-                        uselessvar = Ranking(Boat)
-                        Ranking(Boat) = Ranking(Boat + 1)
-                        Ranking(Boat + 1) = uselessvar
-                    End If
-
+                    For BoatTwo = Boat To MaxIndexBoats
+                        'This line is boolean salad, but it's basically taking 2 indices and checking to see if the
+                        'relative ranking of those two respecive values are obviously wrong (not checking ties) 
+                        If (OutIntArr(Boat) > OutIntArr(BoatTwo) And Ranking(Boat) < OutIntArr(BoatTwo)) Or (OutIntArr(Boat) < OutIntArr(BoatTwo) And Ranking(Boat) > OutIntArr(BoatTwo)) Then
+                            uselessvar = Ranking(Boat)
+                            Ranking(Boat) = Ranking(BoatTwo)
+                            Ranking(BoatTwo) = uselessvar
+                        End If
+                    Next
                 Next
             Next
+
 
             'To handle ties in a way that is easier to compute, I decided to just skip over tied ranks
             'Eg: 4,8,4 becomes 1st(tied),3rd,1st(tied)
