@@ -9,12 +9,11 @@ Public Class Form1
     Public Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
         InArr = {{R1B1, R1B2, R1B3}, {R2B1, R2B2, R2B3}, {R3B1, R3B2, R3B3}, {R4B1, R4B2, R4B3}}
         OutArr = {{TotalB1, TotalB2, TotalB3}, {RankB1, RankB2, RankB3}}
-
     End Sub
 
     Function Register_Tie()
         Error_Label.Text = "Tie"
-        Error_Label.ForeColor = Color.Yellow
+        Error_Label.ForeColor = Color.Orange
     End Function
 
     Function Throw_Error()
@@ -27,19 +26,19 @@ Public Class Form1
 
     End Function
 
+
     Private Sub Clear_Click(sender As Object, e As EventArgs) Handles Clear.Click
-        Dim InArr As TextBox(,) = {{R1B1, R1B2, R1B3}, {R2B1, R2B2, R2B3}, {R3B1, R3B2, R3B3}, {R4B1, R4B2, R4B3}}
-        Dim OutArr As TextBox(,) = {{TotalB1, TotalB2, TotalB3}, {RankB1, RankB2, RankB3}}
-        MessageBox.Show("starting")
+
         For RaceNum = 0 To MaxIndexRaces
             For Boat = 0 To MaxIndexBoats
                 InArr(RaceNum, Boat).Text = ""
             Next
         Next
-        MessageBox.Show("middle")
         For Boat = 0 To MaxIndexBoats
             OutArr(0, Boat).Text = ""
             OutArr(1, Boat).Text = ""
+            OutArr(1, Boat).BackColor = DefaultBackColor
+
         Next
 
         Error_Label.Text = ""
@@ -48,9 +47,10 @@ Public Class Form1
 
     Private Sub Calc_Btn_Click(sender As Object, e As EventArgs) Handles Calc_Btn.Click
         Dim IntArr = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}}
-        Dim InArr As TextBox(,) = {{R1B1, R1B2, R1B3}, {R2B1, R2B2, R2B3}, {R3B1, R3B2, R3B3}, {R4B1, R4B2, R4B3}}
-        Dim OutArr As TextBox(,) = {{TotalB1, TotalB2, TotalB3}, {RankB1, RankB2, RankB3}}
 
+        For Boat = 0 To MaxIndexBoats
+            OutArr(1, Boat).BackColor = DefaultBackColor
+        Next
         Error_Label.Text = ""
 
         'Check For Bad Input
@@ -95,58 +95,69 @@ Public Class Form1
                 'Update
                 OutArr(0, Boat).Text = Convert.ToString(OutIntArr(Boat))
             Next
-        End If
-        'Calculate Order
 
-        'If you were to add more boats the ranking system might 
-        'have issues with ties and you would need to update the previous block as well
+            'Calculate Order
 
-        'This is kinda like a bubble sort thing
-        Dim Ranking = {1, 2, 3}
+            'If you were to add more boats the ranking system might 
+            'have issues with ties and you would need to update the previous block as well
 
-        Dim uselessvar = 0
-        'I don't feel like taking the time to
-        'figure out the time complexity of this sort so imma just let it run 5 times. Should be enough???
-        For uselessiterator = 0 To 5
-            For Boat = 0 To MaxIndexBoats - 1
-                'This line is boolean salad, but it's basically taking 2 indices and checking to see if the
-                'relative ranking of those two respecive values are obviously wrong (not checking ties) 
-                If (OutIntArr(Boat) > OutIntArr(Boat + 1) And Ranking(Boat) > OutIntArr(Boat + 1)) Or (OutIntArr(Boat) < OutIntArr(Boat + 1) And Ranking(Boat) < OutIntArr(Boat + 1)) Then
-                    uselessvar = Ranking(Boat)
-                    Ranking(Boat) = Ranking(Boat + 1)
-                    Ranking(Boat + 1) = uselessvar
-                End If
+            'This is kinda like a bubble sort thing
+            Dim Ranking = {1, 2, 3}
 
-            Next
-        Next
-
-        'To handle ties in a way that is easier to compute, I decided to just skip over tied ranks
-        'Eg: 4,8,4 becomes 1st(tied),3rd,1st(tied)
-
-        Dim Tied As Boolean
-        For Boat = 0 To MaxIndexBoats - 1
-            Tied = False
-            For BoatTwo = Boat + 1 To MaxIndexBoats
-                If OutIntArr(Boat) = OutIntArr(BoatTwo) Then
-                    Register_Tie()
-                    OutArr(1, Boat).BackColor = Color.Yellow
-                    'Couldn't figure out how to do a min/max
-                    If Ranking(Boat) > Ranking(BoatTwo) Then
-                        Ranking(Boat) = Ranking(BoatTwo)
-                    Else
-                        Ranking(BoatTwo) = Ranking(Boat)
+            Dim uselessvar = 0
+            'I don't feel like taking the time to
+            'figure out the time complexity of this sort so imma just let it run 5 times. Should be enough???
+            For uselessiterator = 0 To 5
+                For Boat = 0 To MaxIndexBoats - 1
+                    'This line is boolean salad, but it's basically taking 2 indices and checking to see if the
+                    'relative ranking of those two respecive values are obviously wrong (not checking ties) 
+                    If (OutIntArr(Boat) > OutIntArr(Boat + 1) And Ranking(Boat) > OutIntArr(Boat + 1)) Or (OutIntArr(Boat) < OutIntArr(Boat + 1) And Ranking(Boat) < OutIntArr(Boat + 1)) Then
+                        uselessvar = Ranking(Boat)
+                        Ranking(Boat) = Ranking(Boat + 1)
+                        Ranking(Boat + 1) = uselessvar
                     End If
-                End If
+
+                Next
+            Next
+
+            'To handle ties in a way that is easier to compute, I decided to just skip over tied ranks
+            'Eg: 4,8,4 becomes 1st(tied),3rd,1st(tied)
+
+            Dim Ties As Boolean() = {False, False, False}
+            For Boat = 0 To MaxIndexBoats - 1
+                For BoatTwo = Boat + 1 To MaxIndexBoats
+                    If OutIntArr(Boat) = OutIntArr(BoatTwo) Then
+                        Register_Tie()
+                        Ties(Boat) = True
+                        Ties(BoatTwo) = True
+                        'Couldn't figure out how to do a min/max
+                        If Ranking(Boat) > Ranking(BoatTwo) Then
+                            Ranking(Boat) = Ranking(BoatTwo)
+                        Else
+                            Ranking(BoatTwo) = Ranking(Boat)
+                        End If
+                    End If
+                Next
+
             Next
             'Display Rankings
-            OutArr(1, Boat).Text = Convert.ToString(Ranking(Boat))
+            For Boat = 0 To MaxIndexBoats
+                'Display Rankings and Ties
+                If Ties(Boat) Then
+                    OutArr(1, Boat).BackColor = Color.Orange
+                End If
+                OutArr(1, Boat).Text = Convert.ToString(Ranking(Boat))
 
-        Next
+            Next
+        End If
+
     End Sub
 
 
     Private Sub Close_Click(sender As Object, e As EventArgs) Handles Close.Click
-
+        'Got this lil bit from stackoverflow
+        Application.Exit()
+        End
     End Sub
 
 End Class
